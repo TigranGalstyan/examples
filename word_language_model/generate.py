@@ -30,6 +30,8 @@ parser.add_argument('--temperature', type=float, default=1.0,
                     help='temperature - higher will increase diversity')
 parser.add_argument('--log-interval', type=int, default=100,
                     help='reporting interval')
+parser.add_argument('--prime', type=str, default=None,
+                    help='generation prime')
 args = parser.parse_args()
 
 # Set the random seed manually for reproducibility.
@@ -52,7 +54,12 @@ ntokens = len(corpus.dictionary)
 hidden = model.init_hidden(1)
 input = torch.randint(ntokens, (1, 1), dtype=torch.long).to(device)
 
-with open(args.outf, 'w') as outf:
+
+with open(args.outf, 'w') as outf: 
+    if args.prime:
+        for word in args.prime.split(' '):
+            input.fill_(corpus.dictionary.word2idx[word])
+            outf.write(word + ' ')
     with torch.no_grad():  # no tracking history
         for i in range(args.words):
             output, hidden = model(input, hidden)
